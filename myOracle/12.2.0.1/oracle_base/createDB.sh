@@ -64,8 +64,14 @@ dbca -silent -createDatabase -responseFile $ORACLE_BASE/dbca.rsp ||
  cat /opt/oracle/cfgtoollogs/dbca/$ORACLE_SID/$ORACLE_SID.log ||
  cat /opt/oracle/cfgtoollogs/dbca/$ORACLE_SID.log
 
-echo "$ORACLE_SID=localhost:1521/$ORACLE_SID" > $ORACLE_HOME/network/admin/tnsnames.ora
-echo "$ORACLE_PDB= 
+# my add for user config tnsnames.ora
+if [ -f /etc/oracle/tnsnames.ora ]; then
+  echo "user config tnsname has exists, use it"
+  cp -p /etc/oracle/tnsnames.ora $ORACLE_HOME/network/admin/tnsnames.ora
+else
+  echo "user config tnsname has not exists, create one"
+  echo "$ORACLE_SID=localhost:1521/$ORACLE_SID" > $ORACLE_HOME/network/admin/tnsnames.ora
+  echo "$ORACLE_PDB= 
 (DESCRIPTION = 
   (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
   (CONNECT_DATA =
@@ -73,6 +79,7 @@ echo "$ORACLE_PDB=
     (SERVICE_NAME = $ORACLE_PDB)
   )
 )" >> $ORACLE_HOME/network/admin/tnsnames.ora
+fi
 
 # Remove second control file, make PDB auto open
 sqlplus / as sysdba << EOF

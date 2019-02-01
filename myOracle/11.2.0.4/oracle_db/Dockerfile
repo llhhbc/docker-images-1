@@ -23,7 +23,7 @@
 
 FROM oracle-builder:11.2.0.4.0-ee as builder
 
-FROM oracle-base:11.2.0.4.0-ee
+FROM oracle-base:11.2.0.4.0-ee as prod
 
 COPY --chown=oracle:oinstall --from=builder $ORACLE_BASE $ORACLE_BASE
 
@@ -40,4 +40,5 @@ HEALTHCHECK --interval=1m --start-period=5m \
    CMD "$ORACLE_BASE/$CHECK_DB_FILE" >/dev/null
 
 # Define default command to start Oracle Database. 
-CMD exec $ORACLE_BASE/$RUN_FILE
+#CMD exec $ORACLE_BASE/$RUN_FILE
+ENTRYPOINT sh -c $ORACLE_BASE/$RUN_FILE

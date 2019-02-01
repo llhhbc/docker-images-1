@@ -70,7 +70,13 @@ dbca -initParams java_jit_enabled=false -silent -createDatabase -responseFile $O
  cat /opt/oracle/cfgtoollogs/dbca/$ORACLE_SID/$ORACLE_SID.log ||
  cat /opt/oracle/cfgtoollogs/dbca/$ORACLE_SID.log
 
-echo "$ORACLE_SID=
+# my add for user config tnsnames.ora
+if [ -f /etc/oracle/tnsnames.ora ]; then
+  echo "user config tnsname has exists, use it"
+  cp -p /etc/oracle/tnsnames.ora $ORACLE_HOME/network/admin/tnsnames.ora
+else
+  echo "user config tnsname has not exists, create one"
+  echo "$ORACLE_SID=
 (DESCRIPTION =
   (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
   (CONNECT_DATA =
@@ -78,6 +84,7 @@ echo "$ORACLE_SID=
     (SERVICE_NAME = $ORACLE_SID)
   )
 )" >> $ORACLE_HOME/network/admin/tnsnames.ora
+fi
 
 # Standardize the creation of the database.
 sqlplus / as sysdba << EOF
