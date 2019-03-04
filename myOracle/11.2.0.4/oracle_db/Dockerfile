@@ -27,9 +27,19 @@ FROM oracle-base:11.2.0.4.0-ee as prod
 
 COPY --chown=oracle:oinstall --from=builder $ORACLE_BASE $ORACLE_BASE
 
+ENV CREATE_MON_FILE="createMon.sh"
+
+COPY $RUN_FILE $START_FILE $CREATE_DB_FILE $CREATE_STB_FILE $START_MRP $CONFIG_RSP $CHECK_DB_FILE $CREATE_MON_FILE $ORACLE_BASE/
+
 USER root
-RUN $ORACLE_BASE/oraInventory/orainstRoot.sh && \
+RUN chown oracle:oinstall $ORACLE_BASE/*.sh && \
+    $ORACLE_BASE/oraInventory/orainstRoot.sh && \
     $ORACLE_HOME/root.sh 
+
+##set oracleprobe
+RUN mkdir -p /probe && \
+    ln -s $ORACLE_BASE/$CHECK_DB_FILE /probe/oracleprobe && \
+    chown -R oracle:oinstall /probe
 
 USER oracle
 WORKDIR /home/oracle

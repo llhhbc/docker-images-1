@@ -168,6 +168,14 @@ else
    
   # Execute custom provided setup scripts
   #$ORACLE_BASE/$USER_SCRIPTS_FILE $ORACLE_BASE/scripts/setup
+
+
+  # check if need create monitor user;
+  if [ $ORACLE_MONITOR == "True" ]; then
+    echo "ORACLE_MONITOR is True, begin create monitor user"
+    $ORACLE_BASE/$CREATE_MON_FILE
+  fi
+
 fi;
 
 # Check whether database is up and running

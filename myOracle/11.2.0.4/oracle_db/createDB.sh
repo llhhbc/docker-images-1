@@ -43,6 +43,7 @@ sed -i -e "s|###CDB_ENABLE###|$CDB_ENABLE|g" $ORACLE_BASE/dbca.rsp
 
 # change permission for oracle
 sudo su - root -c "chown -R oracle:dba $ORACLE_BASE/oradata"
+sudo su - root -c "chown -R oracle:dba $ORACLE_BASE/oralog"
 
 # Create network related config files (sqlnet.ora, tnsnames.ora, listener.ora)
 mkdir -p $ORACLE_HOME/network/admin
@@ -62,7 +63,7 @@ DIAG_ADR_ENABLED = off
 " > $ORACLE_HOME/network/admin/listener.ora
 
 # make directory for archivelog
-mkdir -p /opt/oracle/oradata/$ORACLE_SID/archivelog
+mkdir -p /opt/oracle/oralog/$ORACLE_SID/archivelog
 
 # Start LISTENER and run DBCA
 lsnrctl start &&
@@ -96,7 +97,8 @@ sqlplus / as sysdba << EOF
    alter system set audit_trail=none scope=spfile;
    alter system set audit_sys_operations=false scope=spfile;
    alter system set filesystemio_options=directio scope=spfile;
-   alter system set log_archive_dest_1='location=/opt/oracle/oradata/$ORACLE_SID/archivelog';
+   alter system set log_archive_dest_1='location=/opt/oracle/oralog/$ORACLE_SID/archivelog' scope=spfile;
+   alter system set log_archive_format='%t_%s_%r.arc' scope=spfile;
    ALTER SYSTEM SET control_files='$ORACLE_BASE/oradata/$ORACLE_SID/control01.ctl' scope=spfile;
    SHUTDOWN IMMEDIATE;
    STARTUP;

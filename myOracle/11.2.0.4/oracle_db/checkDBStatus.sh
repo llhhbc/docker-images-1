@@ -12,7 +12,7 @@
 # 
 
 ORACLE_SID="`grep $ORACLE_HOME /etc/oratab | cut -d: -f1`"
-ORACLE_PDB="`ls -dl $ORACLE_BASE/oradata/$ORACLE_SID/*/ | grep -v pdbseed | awk '{print $9}' | cut -d/ -f6`"
+#ORACLE_PDB="`ls -dl $ORACLE_BASE/oradata/$ORACLE_SID/*/ | grep -v pdbseed | awk '{print $9}' | cut -d/ -f6`"
 ORAENV_ASK=NO
 source oraenv
 
@@ -31,7 +31,7 @@ EOF`
   # SQL Plus execution was successful and primary database is open
   if [ $ret -eq 0 ] && [ "$status" = "READ WRITE" ]; then
      echo "{\"statusCode\": 1 , \"message\": \"Primary Database is in READ WRITE mode.\"}" > $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/DB_INIT
-     exit 0;
+     #exit 0;
   # Database is not open
   elif [ "$status" != "READ WRITE" ]; then
      echo "{\"statusCode\": 2 , \"message\": \"Database Creation is not successful.Please check manually.\"}" > $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/DB_INIT
@@ -73,3 +73,35 @@ EOF`
   echo "{\"statusCode\": 2 , \"message\": \"Database Creation is not successful.Please check manually.\"}" > $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/DB_INIT
   exit 2;
 fi;
+
+
+if [ $ORACLE_MONITOR == "True" ]; then
+  # my add for check oracle write status
+  status=`sqlplus -s monitor/monitor << EOF
+     set heading off;
+     set pagesize 0;
+     update cmonitor set ctime=sysdate where rownum<2;
+     exit;
+EOF`
+
+  ret=$?
+
+  if [ $ret -ne 0 ];then
+    echo "check db status failed. $status"
+    exit 2;
+  fi;
+
+  status=`echo $status` # trim \r\n etc.
+
+  if [ "$status" == "1 row updated." ];then
+    echo "check db status ok. oracle is ready to write. $status"
+    exit 0;
+  fi;
+
+  echo "check db status fail. oracle cann't write. $status"
+  exit 4;
+fi;
+
+
+
+
