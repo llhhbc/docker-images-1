@@ -8,6 +8,6 @@ docker run -d --name oracledb \
 -e PGA_SIZE=8G \
 -e DB_ROLE=primary \
 -e ENABLE_ARCH=true \
--v /root/oracle/oradata/myora/:/opt/oracle/oradata \
-oracle-db:11.2.0.4.0-ee
+registry.woqutech.com/longhui.li/oracle:11.2.0.4.0-ee
 
+#-v /root/oracle/oradata/myora/:/opt/oracle/oradata \

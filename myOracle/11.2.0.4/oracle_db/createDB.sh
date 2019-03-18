@@ -42,8 +42,8 @@ sed -i -e "s|###CDB_ENABLE###|$CDB_ENABLE|g" $ORACLE_BASE/dbca.rsp
 #fi;
 
 # change permission for oracle
-sudo su - root -c "chown -R oracle:dba $ORACLE_BASE/oradata"
-sudo su - root -c "chown -R oracle:dba $ORACLE_BASE/oralog"
+sudo su - root -c "mkdir -p $ORACLE_BASE/oradata && chown -R oracle:dba $ORACLE_BASE/oradata"
+sudo su - root -c "mkdir -p $ORACLE_BASE/oralog && chown -R oracle:dba $ORACLE_BASE/oralog"
 
 # Create network related config files (sqlnet.ora, tnsnames.ora, listener.ora)
 mkdir -p $ORACLE_HOME/network/admin
@@ -60,6 +60,7 @@ echo "LISTENER =
 
 DEDICATED_THROUGH_BROKER_LISTENER=ON
 DIAG_ADR_ENABLED = off
+DIAG_ADR_ENABLED_LISTENER = off
 " > $ORACLE_HOME/network/admin/listener.ora
 
 # make directory for archivelog
@@ -67,6 +68,7 @@ mkdir -p /opt/oracle/oralog/$ORACLE_SID/archivelog
 
 # Start LISTENER and run DBCA
 lsnrctl start &&
+lsnrctl reload &&
 dbca -initParams java_jit_enabled=false -silent -createDatabase -responseFile $ORACLE_BASE/dbca.rsp -redoLogFileSize 1024 -datafileDestination /opt/oracle/oradata ||
  cat /opt/oracle/cfgtoollogs/dbca/$ORACLE_SID/$ORACLE_SID.log ||
  cat /opt/oracle/cfgtoollogs/dbca/$ORACLE_SID.log

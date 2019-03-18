@@ -75,7 +75,7 @@ EOF`
 fi;
 
 
-if [ $ORACLE_MONITOR == "True" ]; then
+if [ "$ORACLE_MONITOR" == "True" ]; then
   # my add for check oracle write status
   status=`sqlplus -s monitor/monitor << EOF
      set heading off;
